@@ -136,7 +136,7 @@ export default function App() {
   useEffect(() => {
     setCourses(sampleCourses)
     setFilteredCourses(sampleCourses)
-  }, [])
+  }, [sampleCourses])
 
   // Filter courses
   useEffect(() => {
