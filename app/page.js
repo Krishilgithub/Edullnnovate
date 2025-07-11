@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { BookOpen, Users, Clock, Star, Search, Filter, ChevronRight, Play, CheckCircle, Mail, Phone, MapPin, Send, ArrowUp, Loader2 } from 'lucide-react'
+import Navbar from '../components/navbar'
 
 export default function App() {
   const [courses, setCourses] = useState([])
@@ -136,7 +137,7 @@ export default function App() {
   useEffect(() => {
     setCourses(sampleCourses)
     setFilteredCourses(sampleCourses)
-  }, [sampleCourses])
+  }, [])
 
   // Filter courses
   useEffect(() => {
@@ -180,53 +181,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">EduInnovate</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => scrollToSection('courses')}
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Courses
-              </button>
-              <button 
-                onClick={() => scrollToSection('about')}
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                About
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Contact
-              </button>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="hidden sm:inline-flex">Sign In</Button>
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => handleButtonClick('get-started', () => scrollToSection('courses'))}
-                disabled={loadingStates['get-started']}
-              >
-                {loadingStates['get-started'] ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  'Get Started'
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white">
