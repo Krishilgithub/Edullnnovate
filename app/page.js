@@ -7,7 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BookOpen, Users, Clock, Star, Search, Filter, ChevronRight, Play, CheckCircle } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/components/ui/use-toast'
+import { Toaster } from '@/components/ui/toaster'
+import { BookOpen, Users, Clock, Star, Search, Filter, ChevronRight, Play, CheckCircle, Mail, Phone, MapPin, Send, ArrowUp } from 'lucide-react'
 
 export default function App() {
   const [courses, setCourses] = useState([])
