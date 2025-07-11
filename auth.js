@@ -1,61 +1,62 @@
-import NextAuth from 'next-auth';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
-import EmailProvider from 'next-auth/providers/email';
-import clientPromise from './lib/mongodb';
-import { Resend } from 'resend';
+import NextAuth from "next-auth";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import EmailProvider from "next-auth/providers/email";
+import clientPromise from "./lib/mongodb";
+import { Resend } from "resend";
+import GoogleProvider from "next-auth/providers/google";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/auth/signin',
-    verifyRequest: '/auth/verify-request',
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      // Add role to JWT token when user signs in
-      if (user) {
-        token.role = user.role || 'user'; // Default to 'user' if no role is set
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Add role and id to session from JWT token
-      if (session?.user) {
-        session.user.role = token.role;
-        session.user.id = token.id;
-      }
-      return session;
-    },
-  },
-  providers: [
-    EmailProvider({
-      server: {
-        host: 'smtp.resend.com',
-        port: 465,
-        auth: {
-          user: 'resend',
-          pass: process.env.RESEND_API_KEY,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-      // Custom sendVerificationRequest function using Resend
-      async sendVerificationRequest({
-        identifier: email,
-        url,
-        provider: { from },
-      }) {
-        try {
-          const { data, error } = await resend.emails.send({
-            from,
-            to: email,
-            subject: 'Sign in to EduInnovate',
-            html: `
+	adapter: MongoDBAdapter(clientPromise),
+	session: {
+		strategy: "jwt",
+	},
+	pages: {
+		signIn: "/auth/signin",
+		verifyRequest: "/auth/verify-request",
+	},
+	callbacks: {
+		async jwt({ token, user }) {
+			// Add role to JWT token when user signs in
+			if (user) {
+				token.role = user.role || "user"; // Default to 'user' if no role is set
+				token.id = user.id;
+			}
+			return token;
+		},
+		async session({ session, token }) {
+			// Add role and id to session from JWT token
+			if (session?.user) {
+				session.user.role = token.role;
+				session.user.id = token.id;
+			}
+			return session;
+		},
+	},
+	providers: [
+		EmailProvider({
+			server: {
+				host: "smtp.resend.com",
+				port: 465,
+				auth: {
+					user: "resend",
+					pass: process.env.RESEND_API_KEY,
+				},
+			},
+			from: process.env.EMAIL_FROM,
+			// Custom sendVerificationRequest function using Resend
+			async sendVerificationRequest({
+				identifier: email,
+				url,
+				provider: { from },
+			}) {
+				try {
+					const { data, error } = await resend.emails.send({
+						from,
+						to: email,
+						subject: "Sign in to EduInnovate",
+						html: `
               <body style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; color: #333; background-color: #f8fafc;">
                 <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                   <div style="text-align: center; margin-bottom: 30px;">
@@ -93,28 +94,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 </div>
               </body>
             `,
-          });
+					});
 
-          if (error) {
-            throw new Error(`Error sending verification email: ${error.message}`);
-          }
-          
-          console.log(`✅ Verification email sent to ${email}`);
-        } catch (error) {
-          console.error('❌ Error sending verification email', error);
-          throw new Error(`Error sending verification email: ${error.message}`);
-        }
-      },
-    }),
-  ],
-  events: {
-    async createUser({ user }) {
-      // Set default role for new users
-      const db = (await clientPromise).db();
-      await db.collection('users').updateOne(
-        { _id: user.id },
-        { $set: { role: 'user' } }
-      );
-    },
-  },
+					if (error) {
+						throw new Error(
+							`Error sending verification email: ${error.message}`
+						);
+					}
+
+					console.log(`✅ Verification email sent to ${email}`);
+				} catch (error) {
+					console.error("❌ Error sending verification email", error);
+					throw new Error(`Error sending verification email: ${error.message}`);
+				}
+			},
+		}),
+		GoogleProvider({
+			clientId: process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+		}),
+	],
+	events: {
+		async createUser({ user }) {
+			// Set default role for new users
+			const db = (await clientPromise).db();
+			await db
+				.collection("users")
+				.updateOne({ _id: user.id }, { $set: { role: "user" } });
+		},
+	},
 });
